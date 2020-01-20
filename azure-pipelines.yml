@@ -65,7 +65,7 @@ stages:
       displayName: 'Dump Azure Variables'
     - script: |
         cd $(Build.BinariesDirectory)
-        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake.exe -G NMakeFiles -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" -DCMAKE_BUILD_TYPE=Release $(Build.Repository.LocalPath)/EMsoft
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake.exe -G "NMake Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" -DCMAKE_BUILD_TYPE=Release $(Build.Repository.LocalPath)/EMsoft
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
@@ -100,19 +100,7 @@ stages:
       displayName: 'Dump Azure Variables'
     - script: |
         cd $(Build.BinariesDirectory)
-        if [ -f "CMakeCache.txt" ]; then
-          rm CMakeCache.txt
-        fi
-        if [ -d "Bin" ]; then
-          rm -rf Bin
-        fi
-        if [ -d "SIMPLView" ]; then
-          rm -rf SIMPLView
-        fi
-      displayName: 'Clean Build Directory'
-    - script: |
-        cd $(Build.BinariesDirectory)
-        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake -G MakeFiles -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/EMsoft
+        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake -G "Unix Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/EMsoft
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
