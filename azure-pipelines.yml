@@ -1,0 +1,128 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+stages:
+- stage: Build
+  jobs:
+  - job: macOS_10_14
+    timeoutInMinutes: 120
+    workspace:
+      clean: all
+    pool:
+      name: BlueQuartz Self Hosted
+      demands:
+        - agent.os -equals Darwin
+    steps:
+    - script: |
+        echo System.PullRequest.SourceBranch=$(System.PullRequest.SourceBranch)
+        echo System.PullRequest.PullRequestNumber=$(System.PullRequest.PullRequestNumber)
+        echo Build.SourceBranchName=$(Build.SourceBranchName)
+        echo Build.Repository.Name=$(Build.Repository.Name)
+        echo Build.Repository.Uri=$(Build.Repository.Uri)
+        echo Agent.WorkFolder=$(Agent.WorkFolder)
+        echo Agent.os=$(Agent.os)
+        echo Build.BuildNumber=$(Build.BuildNumber)
+      displayName: 'Dump Azure Variables'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        cmake -G "Unix Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/EMsoft
+      displayName: 'Configure EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        cmake --build . --config Release --target all
+      displayName: 'Compile EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
+      displayName: 'Testing EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        cpack --verbose
+      displayName: 'Packing EMsoft'
+  - job: Windows_10_19_03
+    timeoutInMinutes: 120
+    workspace:
+      clean: all
+    pool:
+      name: BlueQuartz Self Hosted
+      demands:
+        - agent.os -equals Windows_NT
+    steps:
+    - script: |
+        echo System.PullRequest.SourceBranch=$(System.PullRequest.SourceBranch)
+        echo System.PullRequest.PullRequestNumber=$(System.PullRequest.PullRequestNumber)
+        echo Build.SourceBranchName=$(Build.SourceBranchName)
+        echo Build.Repository.Name=$(Build.Repository.Name)
+        echo Build.Repository.Uri=$(Build.Repository.Uri)
+        echo Agent.WorkFolder=$(Agent.WorkFolder)
+        echo Agent.os=$(Agent.os)
+        echo Agent.Name=$(Agent.Name)
+        echo Agent.MachineName=$(Agent.MachineName)
+        echo Agent.OSArchitecture=$(Agent.OSArchitecture)
+        echo BUILDNAME=$(Agent.OS)-$(Agent.MachineName)-$(Build.SourceBranchName)_$(Build.BuildNumber)
+        echo Build.BuildNumber=$(Build.BuildNumber)
+      displayName: 'Dump Azure Variables'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake.exe -G NMakeFiles -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" -DCMAKE_BUILD_TYPE=Release $(Build.Repository.LocalPath)/EMsoft
+      displayName: 'Configure EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake --build . --config Release --target all
+      displayName: 'Compile EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
+      displayName: 'Testing EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cpack --verbose
+      displayName: 'Packing EMsoft'
+  - job: Linux_Ubuntu_16_04
+    timeoutInMinutes: 120
+    workspace:
+      clean: all
+    pool:
+      name: BlueQuartz Self Hosted
+      demands:
+        - agent.os -equals linux
+    steps:
+    - script: |
+        echo System.PullRequest.SourceBranch=$(System.PullRequest.SourceBranch)
+        echo System.PullRequest.PullRequestNumber=$(System.PullRequest.PullRequestNumber)
+        echo Build.SourceBranchName=$(Build.SourceBranchName)
+        echo Build.Repository.Name=$(Build.Repository.Name)
+        echo Build.Repository.Uri=$(Build.Repository.Uri)
+        echo Agent.WorkFolder=$(Agent.WorkFolder)
+        echo Agent.os=$(Agent.os)
+        echo Build.BuildNumber=$(Build.BuildNumber)
+      displayName: 'Dump Azure Variables'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        if [ -f "CMakeCache.txt" ]; then
+          rm CMakeCache.txt
+        fi
+        if [ -d "Bin" ]; then
+          rm -rf Bin
+        fi
+        if [ -d "SIMPLView" ]; then
+          rm -rf SIMPLView
+        fi
+      displayName: 'Clean Build Directory'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake -G MakeFiles -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/EMsoft
+      displayName: 'Configure EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake --build . --config Release --target all
+      displayName: 'Compile EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
+      displayName: 'Testing EMsoft'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cpack --verbose
+      displayName: 'Packing EMsoft'
