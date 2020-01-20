@@ -1,3 +1,6 @@
 [submodule "EMsoft"]
 	path = EMsoft
 	url = https://github.com/emsoft-org/EMsoft
+[submodule "EMsoftData"]
+	path = EMsoftData
+	url = https://github.com/emsoft-org/EMsoftData
