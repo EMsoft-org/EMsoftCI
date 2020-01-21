@@ -34,7 +34,7 @@ stages:
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        cmake --build . --config Release --target all
+        cmake --build . --config Release --target all --parallel 12
       displayName: 'Compile EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
@@ -73,7 +73,7 @@ stages:
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake --build . --config Release --target all
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake --build . --config Release --target all  --parallel 12
       displayName: 'Compile EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
@@ -115,7 +115,7 @@ stages:
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake --build . --config Release --target all
+        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake --build . --config Release --target all  --parallel 10
       displayName: 'Compile EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
