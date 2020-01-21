@@ -22,6 +22,10 @@ stages:
         echo Build.Repository.Uri=$(Build.Repository.Uri)
         echo Agent.WorkFolder=$(Agent.WorkFolder)
         echo Agent.os=$(Agent.os)
+        echo Agent.Name=$(Agent.Name)
+        echo Agent.MachineName=$(Agent.MachineName)
+        echo Agent.OSArchitecture=$(Agent.OSArchitecture)
+        echo BUILDNAME=$(Agent.OS)-$(Agent.MachineName)-$(Build.SourceBranchName)_$(Build.BuildNumber)
         echo Build.BuildNumber=$(Build.BuildNumber)
       displayName: 'Dump Azure Variables'
     - script: |
@@ -87,6 +91,7 @@ stages:
       name: BlueQuartz Self Hosted
       demands:
         - agent.os -equals linux
+        - agent.MachineName -equals UTAH
     steps:
     - script: |
         echo System.PullRequest.SourceBranch=$(System.PullRequest.SourceBranch)
@@ -96,10 +101,17 @@ stages:
         echo Build.Repository.Uri=$(Build.Repository.Uri)
         echo Agent.WorkFolder=$(Agent.WorkFolder)
         echo Agent.os=$(Agent.os)
+        echo Agent.Name=$(Agent.Name)
+        echo Agent.MachineName=$(Agent.MachineName)
+        echo Agent.OSArchitecture=$(Agent.OSArchitecture)
+        echo BUILDNAME=$(Agent.OS)-$(Agent.MachineName)-$(Build.SourceBranchName)_$(Build.BuildNumber)
         echo Build.BuildNumber=$(Build.BuildNumber)
       displayName: 'Dump Azure Variables'
     - script: |
         cd $(Build.BinariesDirectory)
+        export CXX=/usr/bin/g++-7
+        export CC=/usr/bin/gcc-7
+        export FC=/usr/bin/gfortran-7 
         $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake -G "Unix Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/EMsoft
       displayName: 'Configure EMsoft'
     - script: |
