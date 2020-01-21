@@ -91,7 +91,6 @@ stages:
       name: BlueQuartz Self Hosted
       demands:
         - agent.os -equals linux
-        - agent.MachineName -equals UTAH
     steps:
     - script: |
         echo System.PullRequest.SourceBranch=$(System.PullRequest.SourceBranch)
