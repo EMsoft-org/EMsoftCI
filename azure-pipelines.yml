@@ -52,6 +52,7 @@ stages:
       displayName: 'Compile EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
+        export EMSOFTPATHNAME="$(Build.Repository.LocalPath)/Workspace/EMsoft"
         $(Agent.WorkFolder)/../cmake-3.16.6-Darwin-x86_64/CMake.app/Contents/bin/ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
       displayName: 'Testing EMsoft'
     - script: |
