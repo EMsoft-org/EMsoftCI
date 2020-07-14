@@ -82,8 +82,13 @@ stages:
         echo Build.BuildNumber=$(Build.BuildNumber)
       displayName: 'Dump Azure Variables'
     - script: |
+        cd $(Build.Repository.LocalPath)
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake.exe -G "NMake Makefiles" -S $(Build.Repository.LocalPath) -B $(Build.Repository.LocalPath)/Build 
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake.exe  --build $(Build.Repository.LocalPath)/Build
+      displayName: 'Clone Repositories'
+    - script: |
         cd $(Build.BinariesDirectory)
-        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake.exe -G "NMake Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" -DCMAKE_BUILD_TYPE=Release $(Build.Repository.LocalPath)/EMsoft
+        $(Agent.WorkFolder)\..\cmake-3.16.2-win64-x64\bin\cmake.exe -G "NMake Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/Workspace/EMsoftData -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" -DCMAKE_BUILD_TYPE=Release $(Build.Repository.LocalPath)/Workspace/EMsoft
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
@@ -121,22 +126,27 @@ stages:
         echo Build.BuildNumber=$(Build.BuildNumber)
       displayName: 'Dump Azure Variables'
     - script: |
+        cd $(Build.Repository.LocalPath)
+        $(Agent.WorkFolder)/../cmake-3.16.6-Linux-x86_64/bin/cmake  -S $(Build.Repository.LocalPath) -B $(Build.Repository.LocalPath)/Build
+        $(Agent.WorkFolder)/../cmake-3.16.6-Linux-x86_64/bin/cmake  --build $(Build.Repository.LocalPath)/Build
+      displayName: 'Clone Repositories'    
+    - script: |
         cd $(Build.BinariesDirectory)
-        export CXX=/usr/bin/g++-7
-        export CC=/usr/bin/gcc-7
-        export FC=/usr/bin/gfortran-7 
-        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake -G "Unix Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/EMsoft
+        export CXX=/usr/bin/g++-8
+        export CC=/usr/bin/gcc-8
+        export FC=/usr/bin/gfortran-8 
+        $(Agent.WorkFolder)/../cmake-3.16.6-Linux-x86_64/bin/cmake -G "Unix Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/Workspace/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/Workspace/EMsoft
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cmake --build . --config Release --target all  --parallel 10
+        $(Agent.WorkFolder)/../cmake-3.16.6-Linux-x86_64/bin/cmake --build . --config Release --target all  --parallel 10
       displayName: 'Compile EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        export EMSOFTPATHNAME=$(Build.Repository.LocalPath)/EMsoft
-        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
+        export EMSOFTPATHNAME=$(Build.Repository.LocalPath)/Workspace/EMsoft
+        $(Agent.WorkFolder)/../cmake-3.16.6-Linux-x86_64/bin/ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
       displayName: 'Testing EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        $(Agent.WorkFolder)/../cmake-3.16.2-Linux-x86_64/bin/cpack --verbose
+        $(Agent.WorkFolder)/../cmake-3.16.6-Linux-x86_64/bin/cpack --verbose
       displayName: 'Packing EMsoft'
