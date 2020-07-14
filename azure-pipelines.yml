@@ -29,20 +29,34 @@ stages:
         echo Build.BuildNumber=$(Build.BuildNumber)
       displayName: 'Dump Azure Variables'
     - script: |
+        cd $(Build.Repository.LocalPath)
+        $(Agent.WorkFolder)/../cmake-3.16.6-Darwin-x86_64/CMake.app/Contents/bin/cmake -G Ninja -S $(Build.Repository.LocalPath) -B $(Build.Repository.LocalPath)/Build 
+        $(Agent.WorkFolder)/../cmake-3.16.6-Darwin-x86_64/CMake.app/Contents/bin/cmake  --build $(Build.Repository.LocalPath)/Build
+      displayName: 'Clone Repositories'
+    - script: |
         cd $(Build.BinariesDirectory)
-        cmake -G "Unix Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/EMsoft
+        if [ -f "CMakeCache.txt" ]; then
+          rm CMakeCache.txt
+        fi
+        if [ -d "Bin" ]; then
+          rm -rf Bin
+        fi
+      displayName: 'Clean Build Directory'
+    - script: |
+        cd $(Build.BinariesDirectory)
+        $(Agent.WorkFolder)/../cmake-3.16.6-Darwin-x86_64/CMake.app/Contents/bin/cmake -G "Unix Makefiles" -DEMsoft_SDK=$(Agent.WorkFolder) -DEMsoftData_DIR=$(Build.Repository.LocalPath)/Workspace/EMsoftData -DCMAKE_BUILD_TYPE=Release -DBUILDNAME="$(Agent.MachineName)-$(Agent.OS)-$(Build.SourceBranchName)_$(Build.BuildNumber)" $(Build.Repository.LocalPath)/Workspace/EMsoft
       displayName: 'Configure EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        cmake --build . --config Release --target all --parallel 12
+        $(Agent.WorkFolder)/../cmake-3.16.6-Darwin-x86_64/CMake.app/Contents/bin/cmake --build . --config Release --target all
       displayName: 'Compile EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
+        $(Agent.WorkFolder)/../cmake-3.16.6-Darwin-x86_64/CMake.app/Contents/bin/ctest -D Experimental --timeout 7200 -DCTEST_SITE=$(Agent.MachineName).bluequartz.net -Ddashboard_source_name=EMsoft
       displayName: 'Testing EMsoft'
     - script: |
         cd $(Build.BinariesDirectory)
-        cpack --verbose
+        $(Agent.WorkFolder)/../cmake-3.16.6-Darwin-x86_64/CMake.app/Contents/bin/cpack --verbose
       displayName: 'Packing EMsoft'
   - job: Windows_10_19_03
     timeoutInMinutes: 120
